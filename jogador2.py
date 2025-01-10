@@ -1,5 +1,4 @@
 import xmlrpc.client
-
 class Jogador:
     def __init__(self, nome, peca, servidor):
         self.nome = nome
@@ -10,7 +9,7 @@ class Jogador:
         while True:
 
             if self.servidor.obter_tabuleiro() is None:
-                print("Aguardando o outro jogador...")
+                print("Aguardando o outro jogador se conectar...")
                 continue
 
             # Verifica se o jogo foi finalizado
@@ -65,9 +64,10 @@ class Jogador:
                     print("Opção inválida. Tente novamente.")
             else:
                 print("\nAguarde seu oponente jogar")
-                mensagem = self.servidor.enviar_mensagem("J2","Oi")
                 continue
 
+    def ping(self):
+        return "ok"
 
 
 def main():
