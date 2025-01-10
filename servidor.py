@@ -14,6 +14,7 @@ class ServidorOthello:
         self.vez = None
         self.finalizado = False
         self.vencedor = None
+        self.mensagens = {}  # Dicionário para armazenar mensagens para cada jogador
 
     def entrar_jogo(self, nome):
         if len(self.jogadores) >= 2:
@@ -25,7 +26,7 @@ class ServidorOthello:
         if len(self.jogadores) == 2:
             self.vez = "⚫"
 
-        return peca, "Aguardando o outro jogador se conectar." if len(self.jogadores) < 2 else "O jogo começou!"
+        return peca, "Aguardando o outro jogador se conectar..." if len(self.jogadores) < 2 else "O jogo começou!"
 
     def obter_tabuleiro(self):
         if len(self.jogadores) < 2:
@@ -90,11 +91,11 @@ class ServidorOthello:
             return f"Não é sua vez. É a vez de {self.vez}."
 
         if not (0 <= linha < 8 and 0 <= coluna < 8) or self.tabuleiro[linha][coluna] != "❌":
-            return "Jogada inválida. Posição ocupada ou fora do tabuleiro."
+            return "Jogada inválida. Posição ocupada ou fora do tabuleiro ❌"
 
         direcoes_validas = self.jogada_valida(peca, linha, coluna)
         if not direcoes_validas:
-            return "Jogada inválida. Não há peças adversárias para capturar."
+            return "Jogada inválida. Não há peças adversárias para capturar ❌"
 
         self.aplicar_jogada(peca, linha, coluna, direcoes_validas)
         self.vez = "⚪" if peca == "⚫" else "⚫"
@@ -104,7 +105,7 @@ class ServidorOthello:
             self.finalizado = True
             return self.determinar_vencedor()
 
-        return "Jogada realizada com sucesso."
+        return "Jogada realizada com sucesso ✅"
 
     def verificar_jogadas_disponiveis(self):
         """Verifica se há jogadas possíveis para ambos os jogadores."""
@@ -120,13 +121,21 @@ class ServidorOthello:
         # Adiciona a mensagem ao chat
         self.chat.append(f"{nome}: {mensagem}")
         
-        # Envia a mensagem para o adversário
+        # Adiciona a mensagem no dicionário de mensagens
         for jogador in self.jogadores:
             if jogador[0] != nome:  # Enviar para o adversário
-                # Aqui deve ser feita uma ação para transmitir a mensagem de volta ao adversário.
-                # No caso, o envio de uma mensagem é mostrado no print para o jogador correspondente
-                print(f"Mensagem do Oponente ({nome}): {mensagem}")
-                return f"Mensagem para {jogador[0]} enviada."
+                if jogador[0] not in self.mensagens:
+                    self.mensagens[jogador[0]] = []
+                self.mensagens[jogador[0]].append(f"{mensagem}")
+        return f"Mensagem para o adversário enviada."
+    
+    def obter_mensagem(self, nome):
+        """Retorna as mensagens para o jogador especificado e limpa a fila."""
+        if nome in self.mensagens and self.mensagens[nome]:
+            mensagens = self.mensagens[nome]
+            self.mensagens[nome] = []  # Limpa as mensagens após retornar
+            return "\n".join(mensagens)
+        return "Nenhuma nova mensagem."
 
     def obter_chat(self):
         return self.chat
@@ -138,7 +147,7 @@ class ServidorOthello:
             vencedor = "⚪"
         else:
             vencedor = "⚫"
-        self.vencedor = f"{vencedor} venceu porque o adversário desistiu."
+        self.vencedor = f"Seu adversário desistiu. Você é o grande vencedor! 🏆"
 
         # Notifica ambos os jogadores sobre a desistência
         for jogador in self.jogadores:
@@ -157,5 +166,5 @@ servidor = ServidorOthello()
 
 with SimpleXMLRPCServer(("localhost", 8000), requestHandler=RequestHandler, allow_none=True) as server:
     server.register_instance(servidor)
-    print("Servidor Othello rodando na porta 8000...")
+    print("Servidor Othello estabelecido localmente na porta 8000...✅")
     server.serve_forever()

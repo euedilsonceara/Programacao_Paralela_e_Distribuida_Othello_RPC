@@ -21,7 +21,12 @@ class Jogador:
             # Exibe "Sua vez de jogar" e o tabuleiro atualizado, somente quando for a vez do jogador
             if self.servidor.obter_vez() == self.peca:
                 print("\nSua vez de jogar")
-                
+
+                # Verifica se há mensagens para o jogador
+                mensagens = self.servidor.obter_mensagem(self.nome)
+                if mensagens != "Nenhuma nova mensagem.":
+                    print(f'Mensagem do adversário: {mensagens}')
+
                 # Exibe o tabuleiro mais atualizado
                 print("\nTabuleiro atual:")
                 for linha in self.servidor.obter_tabuleiro():
@@ -29,10 +34,10 @@ class Jogador:
 
                 # Exibe o menu
                 print("\nMenu:")
-                print("1 - Realizar Jogada")
-                print("2 - Contar Peças")
-                print("3 - Enviar Mensagem")
-                print("4 - Desistir")
+                print("1️⃣  - Realizar Jogada")
+                print("2️⃣  - Contar Peças")
+                print("3️⃣  - Enviar Mensagem")
+                print("4️⃣  - Desistir")
                 opcao = input("Escolha uma opção: ")
 
                 if opcao == "1":
@@ -65,10 +70,6 @@ class Jogador:
             else:
                 print("\nAguarde seu oponente jogar")
                 continue
-
-    def ping(self):
-        return "ok"
-
 
 def main():
     servidor = xmlrpc.client.ServerProxy("http://localhost:8000/RPC2", allow_none=True)
